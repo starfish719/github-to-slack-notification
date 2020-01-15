@@ -39,10 +39,45 @@ exports.handler = async (event) => {
         }; 
     }
 
-    // TODO POST処理
+    await Promise.all([post(message.body)]);
     
     return {
         statusCode: 200,
         body: JSON.stringify('Finish'),
     };
 };
+
+function post(message) {
+    return new Promise((resolve, reject) => {
+        const data = {
+            token: process.env['API_TOKEN'],
+            channel: process.env['CHANNEL_ID'],
+            message: message,
+        };
+        const options = {
+            host: 'slack.com',
+            port: '443',
+            path: '/api/chat.postMessage',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        };
+        const req = https.request(options, res => {
+            res.setEncoding('utf8');
+            res.on('data', (chunk) => {
+                const result = JSON.parse(chunk);
+                if (result.ok) {
+                    resolve(chunk);
+                } else {
+                    resolve(new Error());
+                }
+            });
+        });
+        req.on('error', e => {
+            resolve(new Error());
+        });
+        req.write(JSON.stringify(data));
+        req.end();
+    });
+}
