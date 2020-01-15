@@ -1,5 +1,5 @@
+var https = require('https');
 exports.handler = async (event) => {
-
     const gitHubBody = JSON.parse(event.body);
     const eventName = event.headers['X-GitHub-Event'];
 
@@ -7,7 +7,7 @@ exports.handler = async (event) => {
         title: null,
         url: null,
         body: null,
-    }
+    };
 
     if (eventName === 'pull_request' && gitHubBody.action === 'opened') {
         message.title = `#${gitHubBody.pullRequest.number} ${gitHubBody.pullRequest.title}`;
@@ -47,12 +47,16 @@ exports.handler = async (event) => {
     };
 };
 
-function post(message) {
+function post (message) {
     return new Promise((resolve, reject) => {
         const data = {
-            token: process.env['API_TOKEN'],
+            username: "github2slack",
             channel: process.env['CHANNEL_ID'],
-            message: message,
+            attachments: [
+              {
+                text: message,
+              }
+            ],
         };
         const options = {
             host: 'slack.com',
@@ -60,6 +64,7 @@ function post(message) {
             path: '/api/chat.postMessage',
             method: 'POST',
             headers: {
+                'Authorization': 'Bearer ' + process.env['API_TOKEN'],
                 'Content-Type': 'application/json',
             },
         };
