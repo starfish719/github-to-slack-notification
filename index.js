@@ -9,17 +9,27 @@ exports.handler = async (event) => {
         body: null,
     };
 
-    if (eventName === 'pull_request' && gitHubBody.action === 'opened') {
-        message.title = `Pullrequest Opened [<${gitHubBody.pullRequest.html_url}|${gitHubBody.pullRequest.title}>]`;
-        message.body = gitHubBody.pullRequest.body;
-    } else if (eventName === 'issues' && gitHubBody.action === 'opened')  {
-        message.title = `Issue Opened [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
-        message.body = gitHubBody.issue.body;
+    if (eventName === 'pull_request') {
+        if (gitHubBody.action === 'opened') {
+            message.title = `Pullrequest Opened [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+            message.body = gitHubBody.pull_request.body;
+        } else if (gitHubBody.action === 'closed') {
+            message.title = `Pullrequest Closed [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+            message.body = "";
+        }
+    } else if (eventName === 'issues')  {
+        if (gitHubBody.action === 'opened') {
+            message.title = `Issue Opened [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
+            message.body = gitHubBody.issue.body;
+        } else if (gitHubBody.action === 'closed') {
+            message.title = `Issue Closed [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
+            message.body = "";
+        }
     } else if (eventName === 'issue_comment' && gitHubBody.action === 'created')  {
-        message.title = `Issue Comment on [<${gitHubBody.comment.html_url}|${gitHubBody.issue.title}>]`;
+        message.title = `Comment on [<${gitHubBody.comment.html_url}|${gitHubBody.issue.title}>]`;
         message.body = gitHubBody.comment.body;
     } else if (eventName === 'pull_request_review_comment' && gitHubBody.action === 'created')  {
-        message.title = `Review on [<${gitHubBody.comment.html_url}|${gitHubBody.pullRequest.title}>]`;
+        message.title = `Review on [<${gitHubBody.comment.html_url}|${gitHubBody.pull_request.title}>]`;
         message.body = gitHubBody.comment.body;
     } else {
         return {
@@ -28,14 +38,14 @@ exports.handler = async (event) => {
         }; 
     }
 
-    if (!message.body) {
+    if (!message.title && !message.body) {
         return {
             statusCode: 200,
             body: 'No message',
         }; 
     }
 
-    mentionList = getMentionList(message.body);
+    const mentionList = getMentionList(message.body);
     message.title = mentionList.join(' ') + ' ' + message.title;
 
     await Promise.all([post(message)]);
