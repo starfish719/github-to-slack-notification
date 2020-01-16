@@ -1,29 +1,25 @@
 var https = require('https');
+const MAPPING_LIST = require('./mapping.json');
 exports.handler = async (event) => {
     const gitHubBody = JSON.parse(event.body);
     const eventName = event.headers['X-GitHub-Event'];
 
     const message = {
         title: null,
-        url: null,
         body: null,
     };
 
     if (eventName === 'pull_request' && gitHubBody.action === 'opened') {
-        message.title = `#${gitHubBody.pullRequest.number} ${gitHubBody.pullRequest.title}`;
-        message.url = gitHubBody.pullRequest.html_url;
+        message.title = `Pullrequest Opened [<${gitHubBody.pullRequest.html_url}|${gitHubBody.pullRequest.title}>]`;
         message.body = gitHubBody.pullRequest.body;
     } else if (eventName === 'issues' && gitHubBody.action === 'opened')  {
-        message.title = `#${gitHubBody.issue.number} ${gitHubBody.issue.title}`;
-        message.url = gitHubBody.issue.html_url;
+        message.title = `Issue Opened [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
         message.body = gitHubBody.issue.body;
     } else if (eventName === 'issue_comment' && gitHubBody.action === 'created')  {
-        message.title = `Comment on #${gitHubBody.issue.number} ${gitHubBody.issue.title}`;
-        message.url = gitHubBody.comment.html_url;
+        message.title = `Issue Comment on [<${gitHubBody.comment.html_url}|${gitHubBody.issue.title}>]`;
         message.body = gitHubBody.comment.body;
     } else if (eventName === 'pull_request_review_comment' && gitHubBody.action === 'created')  {
-        message.title = `Review on #${gitHubBody.pullRequest.number} ${gitHubBody.pullRequest.title}`;
-        message.url = gitHubBody.comment.html_url;
+        message.title = `Review on [<${gitHubBody.comment.html_url}|${gitHubBody.pullRequest.title}>]`;
         message.body = gitHubBody.comment.body;
     } else {
         return {
@@ -39,7 +35,10 @@ exports.handler = async (event) => {
         }; 
     }
 
-    await Promise.all([post(message.body)]);
+    mentionList = getMentionList(message.body);
+    message.title = mentionList.join(' ') + ' ' + message.title;
+
+    await Promise.all([post(message)]);
     
     return {
         statusCode: 200,
@@ -47,16 +46,28 @@ exports.handler = async (event) => {
     };
 };
 
+function getMentionList (body) {
+    if (body == null || body === undefined) {
+        body = '';
+    }
+
+    var mentionList = [];
+    Object.keys(MAPPING_LIST).forEach(function (key) {
+        if (body.indexOf('@' + key) >= 0) {
+            mentionList.push('<@' + MAPPING_LIST[key] + '>');
+        }
+    });
+
+    return mentionList;
+}
+
 function post (message) {
     return new Promise((resolve, reject) => {
         const data = {
             username: "github2slack",
             channel: process.env['CHANNEL_ID'],
-            attachments: [
-              {
-                text: message,
-              }
-            ],
+            text: message.title,
+            token: process.env['API_TOKEN'],
         };
         const options = {
             host: 'slack.com',
