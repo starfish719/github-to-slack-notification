@@ -15,7 +15,7 @@ exports.handler = async (event) => {
             message.body = gitHubBody.pull_request.body;
         } else if (gitHubBody.action === 'closed') {
             message.title = `Pullrequest Closed [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
-            message.body = "";
+            message.body = '';
         } else if (gitHubBody.action === 'review_requested') {
             message.title = `Review requested [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
             message.body = "@" + gitHubBody.requested_reviewer.login;
@@ -26,11 +26,19 @@ exports.handler = async (event) => {
             message.body = gitHubBody.issue.body;
         } else if (gitHubBody.action === 'closed') {
             message.title = `Issue Closed [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
-            message.body = "";
+            message.body = '';
         }
     } else if (eventName === 'issue_comment' && gitHubBody.action === 'created')  {
         message.title = `Comment on [<${gitHubBody.comment.html_url}|${gitHubBody.issue.title}>]`;
         message.body = gitHubBody.comment.body;
+    } else if (eventName === 'pull_request_review' && gitHubBody.action === 'submitted')  {
+        if (gitHubBody.review.state == 'approved') {
+            message.title = `Pullrequest approval [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+            message.body = '';
+        } else if (gitHubBody.review.state == 'changes_requested') {
+            message.title = `Pullrequest change request [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+            message.body = '';
+        }
     } else if (eventName === 'pull_request_review_comment' && gitHubBody.action === 'created')  {
         message.title = `Review on [<${gitHubBody.comment.html_url}|${gitHubBody.pull_request.title}>]`;
         message.body = gitHubBody.comment.body;
