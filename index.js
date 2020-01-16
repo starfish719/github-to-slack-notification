@@ -16,6 +16,9 @@ exports.handler = async (event) => {
         } else if (gitHubBody.action === 'closed') {
             message.title = `Pullrequest Closed [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
             message.body = "";
+        } else if (gitHubBody.action === 'review_requested') {
+            message.title = `Review requested [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+            message.body = "@" + gitHubBody.requested_reviewer.login;
         }
     } else if (eventName === 'issues')  {
         if (gitHubBody.action === 'opened') {
