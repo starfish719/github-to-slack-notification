@@ -8,7 +8,7 @@ function getMentionList(body) {
     return mentionList;
   }
 
-  Object.keys(MAPPING_LIST).forEach((key) => {
+  Object.keys(MAPPING_LIST).forEach(key => {
     if (body.indexOf(`@${key}`) >= 0) {
       mentionList.push(`<@${MAPPING_LIST[key]}>`);
     }
@@ -23,7 +23,7 @@ function post(message) {
       username: 'github2slack',
       channel: process.env.CHANNEL_ID,
       text: message.title,
-      token: process.env.API_TOKEN,
+      token: process.env.API_TOKEN
     };
     const options = {
       host: 'slack.com',
@@ -32,12 +32,12 @@ function post(message) {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${process.env.API_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
+        'Content-Type': 'application/json'
+      }
     };
-    const req = https.request(options, (res) => {
+    const req = https.request(options, res => {
       res.setEncoding('utf8');
-      res.on('data', (chunk) => {
+      res.on('data', chunk => {
         const result = JSON.parse(chunk);
         if (result.ok) {
           resolve(chunk);
@@ -46,10 +46,10 @@ function post(message) {
         }
       });
     });
-    req.on('error', (e) => {
+    req.on('error', e => {
       resolve(new Error(e));
     });
-    req.on('for lint', (e) => {
+    req.on('for lint', e => {
       reject(new Error(e));
     });
     req.write(JSON.stringify(data));
@@ -57,13 +57,13 @@ function post(message) {
   });
 }
 
-exports.handler = async (event) => {
+exports.handler = async event => {
   const gitHubBody = JSON.parse(event.body);
   const eventName = event.headers['X-GitHub-Event'];
 
   const message = {
     title: null,
-    body: null,
+    body: null
   };
 
   if (eventName === 'pull_request') {
@@ -88,7 +88,10 @@ exports.handler = async (event) => {
   } else if (eventName === 'issue_comment' && gitHubBody.action === 'created') {
     message.title = `Comment on [<${gitHubBody.comment.html_url}|${gitHubBody.issue.title}>]`;
     message.body = gitHubBody.comment.body;
-  } else if (eventName === 'pull_request_review' && gitHubBody.action === 'submitted') {
+  } else if (
+    eventName === 'pull_request_review' &&
+    gitHubBody.action === 'submitted'
+  ) {
     if (gitHubBody.review.state === 'approved') {
       message.title = `Pullrequest approval [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
       message.body = '';
@@ -96,20 +99,23 @@ exports.handler = async (event) => {
       message.title = `Pullrequest change request [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
       message.body = '';
     }
-  } else if (eventName === 'pull_request_review_comment' && gitHubBody.action === 'created') {
+  } else if (
+    eventName === 'pull_request_review_comment' &&
+    gitHubBody.action === 'created'
+  ) {
     message.title = `Review on [<${gitHubBody.comment.html_url}|${gitHubBody.pull_request.title}>]`;
     message.body = gitHubBody.comment.body;
   } else {
     return {
       statusCode: 200,
-      body: 'No post event',
+      body: 'No post event'
     };
   }
 
   if (!message.title && !message.body) {
     return {
       statusCode: 200,
-      body: 'No message',
+      body: 'No message'
     };
   }
 
@@ -120,6 +126,6 @@ exports.handler = async (event) => {
 
   return {
     statusCode: 200,
-    body: JSON.stringify('Finish'),
+    body: JSON.stringify('Finish')
   };
 };
