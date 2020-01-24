@@ -19,6 +19,7 @@ module.exports = {
     "prettier/prettier": [
       "error",
       {"singleQuote": true}
-    ]
+    ],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
   },
 };
