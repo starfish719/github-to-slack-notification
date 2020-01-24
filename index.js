@@ -17,24 +17,32 @@ function getMentionList(body) {
   return mentionList;
 }
 
+function getPostData(message) {
+  return {
+    username: 'github2slack',
+    channel: process.env.CHANNEL_ID,
+    text: message.title,
+    token: process.env.API_TOKEN
+  };
+}
+
+function getPostOptions() {
+  return {
+    host: 'slack.com',
+    port: '443',
+    path: '/api/chat.postMessage',
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.API_TOKEN}`,
+      'Content-Type': 'application/json'
+    }
+  };
+}
+
 function post(message) {
   return new Promise((resolve, _reject) => {
-    const data = {
-      username: 'github2slack',
-      channel: process.env.CHANNEL_ID,
-      text: message.title,
-      token: process.env.API_TOKEN
-    };
-    const options = {
-      host: 'slack.com',
-      port: '443',
-      path: '/api/chat.postMessage',
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.API_TOKEN}`,
-        'Content-Type': 'application/json'
-      }
-    };
+    const data = getPostData(message);
+    const options = getPostOptions();
     const req = https.request(options, res => {
       res.setEncoding('utf8');
       res.on('data', chunk => {
@@ -54,72 +62,75 @@ function post(message) {
   });
 }
 
-exports.handler = async event => {
+function getMessageObject(event) {
   const gitHubBody = JSON.parse(event.body);
   const eventName = event.headers['X-GitHub-Event'];
 
-  const message = {
+  const msgObj = {
     title: null,
     body: null
   };
 
   if (eventName === 'pull_request') {
     if (gitHubBody.action === 'opened') {
-      message.title = `Pullrequest Opened [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
-      message.body = gitHubBody.pull_request.body;
+      msgObj.title = `Pullrequest Opened [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+      msgObj.body = gitHubBody.pull_request.body;
     } else if (gitHubBody.action === 'closed') {
-      message.title = `Pullrequest Closed [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
-      message.body = '';
+      msgObj.title = `Pullrequest Closed [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+      msgObj.body = '';
     } else if (gitHubBody.action === 'review_requested') {
-      message.title = `Review requested [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
-      message.body = `@${gitHubBody.requested_reviewer.login}`;
+      msgObj.title = `Review requested [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+      msgObj.body = `@${gitHubBody.requested_reviewer.login}`;
     }
   } else if (eventName === 'issues') {
     if (gitHubBody.action === 'opened') {
-      message.title = `Issue Opened [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
-      message.body = gitHubBody.issue.body;
+      msgObj.title = `Issue Opened [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
+      msgObj.body = gitHubBody.issue.body;
     } else if (gitHubBody.action === 'closed') {
-      message.title = `Issue Closed [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
-      message.body = '';
+      msgObj.title = `Issue Closed [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
+      msgObj.body = '';
     }
   } else if (eventName === 'issue_comment' && gitHubBody.action === 'created') {
-    message.title = `Comment on [<${gitHubBody.comment.html_url}|${gitHubBody.issue.title}>]`;
-    message.body = gitHubBody.comment.body;
+    msgObj.title = `Comment on [<${gitHubBody.comment.html_url}|${gitHubBody.issue.title}>]`;
+    msgObj.body = gitHubBody.comment.body;
   } else if (
     eventName === 'pull_request_review' &&
     gitHubBody.action === 'submitted'
   ) {
     if (gitHubBody.review.state === 'approved') {
-      message.title = `Pullrequest approval [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
-      message.body = '';
+      msgObj.title = `Pullrequest approval [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+      msgObj.body = '';
     } else if (gitHubBody.review.state === 'changes_requested') {
-      message.title = `Pullrequest change request [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
-      message.body = '';
+      msgObj.title = `Pullrequest change request [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+      msgObj.body = '';
     }
   } else if (
     eventName === 'pull_request_review_comment' &&
     gitHubBody.action === 'created'
   ) {
-    message.title = `Review on [<${gitHubBody.comment.html_url}|${gitHubBody.pull_request.title}>]`;
-    message.body = gitHubBody.comment.body;
+    msgObj.title = `Review on [<${gitHubBody.comment.html_url}|${gitHubBody.pull_request.title}>]`;
+    msgObj.body = gitHubBody.comment.body;
   } else {
-    return {
-      statusCode: 200,
-      body: 'No post event'
-    };
+    return msgObj;
   }
 
-  if (!message.title && !message.body) {
+  const mentionList = getMentionList(msgObj.body);
+  msgObj.title = `${mentionList.join(' ')} ${msgObj.title}`;
+
+  return msgObj;
+}
+
+exports.handler = async event => {
+  const msgObj = getMessageObject(event);
+
+  if (!msgObj.title && !msgObj.body) {
     return {
       statusCode: 200,
       body: 'No message'
     };
   }
 
-  const mentionList = getMentionList(message.body);
-  message.title = `${mentionList.join(' ')} ${message.title}`;
-
-  await Promise.all([post(message)]);
+  await Promise.all([post(msgObj)]);
 
   return {
     statusCode: 200,
