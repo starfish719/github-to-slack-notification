@@ -18,7 +18,7 @@ function getMentionList(body) {
 }
 
 function post(message) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     const data = {
       username: 'github2slack',
       channel: process.env.CHANNEL_ID,
@@ -48,9 +48,6 @@ function post(message) {
     });
     req.on('error', e => {
       resolve(new Error(e));
-    });
-    req.on('for lint', e => {
-      reject(new Error(e));
     });
     req.write(JSON.stringify(data));
     req.end();
