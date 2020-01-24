@@ -72,22 +72,24 @@ function getMessageObject(event) {
   };
 
   if (eventName === 'pull_request') {
+    const pullRequestLink = `[<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
     if (gitHubBody.action === 'opened') {
-      msgObj.title = `Pullrequest Opened [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+      msgObj.title = `Pullrequest Opened ${pullRequestLink}`;
       msgObj.body = gitHubBody.pull_request.body;
     } else if (gitHubBody.action === 'closed') {
-      msgObj.title = `Pullrequest Closed [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+      msgObj.title = `Pullrequest Closed ${pullRequestLink}`;
       msgObj.body = '';
     } else if (gitHubBody.action === 'review_requested') {
-      msgObj.title = `Review requested [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+      msgObj.title = `Review requested ${pullRequestLink}`;
       msgObj.body = `@${gitHubBody.requested_reviewer.login}`;
     }
   } else if (eventName === 'issues') {
+    const issueLink = `Issue Opened [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
     if (gitHubBody.action === 'opened') {
-      msgObj.title = `Issue Opened [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
+      msgObj.title = `Issue Opened ${issueLink}`;
       msgObj.body = gitHubBody.issue.body;
     } else if (gitHubBody.action === 'closed') {
-      msgObj.title = `Issue Closed [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
+      msgObj.title = `Issue Closed ${issueLink}`;
       msgObj.body = '';
     }
   } else if (eventName === 'issue_comment' && gitHubBody.action === 'created') {
@@ -97,11 +99,12 @@ function getMessageObject(event) {
     eventName === 'pull_request_review' &&
     gitHubBody.action === 'submitted'
   ) {
+    const pullRequestLink = `[<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
     if (gitHubBody.review.state === 'approved') {
-      msgObj.title = `Pullrequest approval [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+      msgObj.title = `Pullrequest approval ${pullRequestLink}`;
       msgObj.body = '';
     } else if (gitHubBody.review.state === 'changes_requested') {
-      msgObj.title = `Pullrequest change request [<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+      msgObj.title = `Pullrequest change request ${pullRequestLink}`;
       msgObj.body = '';
     }
   } else if (
