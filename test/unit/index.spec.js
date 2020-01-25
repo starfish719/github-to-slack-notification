@@ -1,4 +1,4 @@
-const { getMentionList } = require('../../index');
+const { getMentionList, getPostData } = require('../../index');
 
 describe('getMentionList', () => {
   test('convert mention user', () => {
@@ -24,5 +24,19 @@ describe('getMentionList', () => {
   test('return empty array when body is null or undefined', () => {
     expect(getMentionList(null)).toStrictEqual([]);
     expect(getMentionList(undefined)).toStrictEqual([]);
+  });
+});
+
+describe('getPostData', () => {
+  test('get data', () => {
+    process.env.CHANNEL_ID = 'ABC123';
+    process.env.API_TOKEN = 'DEF456';
+    const message = { title: 'post data title' };
+    expect(getPostData(message)).toStrictEqual({
+      username: 'github2slack',
+      channel: 'ABC123',
+      text: message.title,
+      token: 'DEF456'
+    });
   });
 });

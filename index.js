@@ -142,6 +142,6 @@ exports.handler = async event => {
 };
 
 exports.getMentionList = getMentionList;
-exports.getPostData = getPostOptions;
+exports.getPostData = getPostData;
 exports.getPostOptions = getPostOptions;
 exports.getMessageObject = getMessageObject;
