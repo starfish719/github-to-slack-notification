@@ -140,3 +140,8 @@ exports.handler = async event => {
     body: JSON.stringify('Finish')
   };
 };
+
+exports.getMentionList = getMentionList;
+exports.getPostData = getPostOptions;
+exports.getPostOptions = getPostOptions;
+exports.getMessageObject = getMessageObject;
