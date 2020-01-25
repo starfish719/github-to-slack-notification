@@ -21,10 +21,10 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
-    - name: npm install
-      run: npm install
+    - name: npm ci
+      run: npm ci
     - name: npm run test
       run: npm run test
