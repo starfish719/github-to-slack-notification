@@ -4,11 +4,6 @@ on:
   pull_request:
     branches:
       - master
-    paths:
-      - '.github/workflow/test.yml'
-      - 'package.json'
-      - 'index.js'
-      - 'common.js'
 
 jobs:
   build:
