@@ -84,7 +84,7 @@ function getMessageObject(event) {
       msgObj.body = `@${gitHubBody.requested_reviewer.login}`;
     }
   } else if (eventName === 'issues') {
-    const issueLink = `Issue Opened [<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
+    const issueLink = `[<${gitHubBody.issue.html_url}|${gitHubBody.issue.title}>]`;
     if (gitHubBody.action === 'opened') {
       msgObj.title = `Issue Opened ${issueLink}`;
       msgObj.body = gitHubBody.issue.body;
@@ -118,7 +118,9 @@ function getMessageObject(event) {
   }
 
   const mentionList = getMentionList(msgObj.body);
-  msgObj.title = `${mentionList.join(' ')} ${msgObj.title}`;
+  if (mentionList.length > 0) {
+    msgObj.title = `${mentionList.join(' ')} ${msgObj.title}`;
+  }
 
   return msgObj;
 }
@@ -140,3 +142,8 @@ exports.handler = async event => {
     body: JSON.stringify('Finish')
   };
 };
+
+exports.getMentionList = getMentionList;
+exports.getPostData = getPostData;
+exports.getPostOptions = getPostOptions;
+exports.getMessageObject = getMessageObject;
