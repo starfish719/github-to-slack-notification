@@ -21,7 +21,7 @@ Convert github mentions to slack mentions
 - Create a AWS Lambda Script
   - Use Node.js
   - Trigger is AWS API Gateway
-- Copy to index.js
+- Copy to index.js and common.js
 - Create mapping.json
   - From github_id to slack_id
 - Setting ENV Vals
