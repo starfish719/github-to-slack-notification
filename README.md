@@ -5,6 +5,10 @@ Notification script from github to slack
 
 Convert github mentions to slack mentions
 
+## Development
+- `npm ci`
+- `npm run test`
+
 ## Setting
 ### Create slack app
 - Aaccess to https://api.slack.com
