@@ -3,7 +3,7 @@ const {
   getPostData,
   getPostOptions,
   getMessageObject
-} = require('../../index');
+} = require('../../common');
 
 describe('getMentionList', () => {
   test('convert mention user', () => {
