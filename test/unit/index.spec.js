@@ -1,4 +1,9 @@
-const { getMentionList, getPostData, getPostOptions } = require('../../index');
+const {
+  getMentionList,
+  getPostData,
+  getPostOptions,
+  getMessageObject
+} = require('../../index');
 
 describe('getMentionList', () => {
   test('convert mention user', () => {
@@ -53,6 +58,167 @@ describe('getPostOptions', () => {
         Authorization: `Bearer ABC123`,
         'Content-Type': 'application/json'
       }
+    });
+  });
+});
+
+describe('getMessageObject', () => {
+  let event = null;
+  beforeEach(() => {
+    event = {
+      headers: { 'X-GitHub-Event': '' },
+      body: {
+        action: '',
+        pull_request: {
+          title: 'test pull_request title',
+          html_url: 'https://github.com/hoge/fuga/pull/1',
+          body: 'pull_request body'
+        },
+        requested_reviewer: { login: 'reviewer user' },
+        review: { state: '' },
+        issue: {
+          title: 'test issue title',
+          html_url: 'https://github.com/hoge/fuga/issues/1',
+          body: 'issue body'
+        },
+        comment: {
+          html_url: 'https://github.com/hoge/fuga/issues/1#issuecomment-12345',
+          body: 'issue comment body'
+        }
+      }
+    };
+  });
+
+  test('pull_request opened', () => {
+    event.headers['X-GitHub-Event'] = 'pull_request';
+
+    event.body.action = 'opened';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'Pullrequest Opened [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
+      body: 'pull_request body'
+    });
+  });
+
+  test('pull_request closed', () => {
+    event.headers['X-GitHub-Event'] = 'pull_request';
+
+    event.body.action = 'closed';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'Pullrequest Closed [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
+      body: ''
+    });
+  });
+
+  test('pull_request review_requested', () => {
+    event.headers['X-GitHub-Event'] = 'pull_request';
+
+    event.body.action = 'review_requested';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'Review requested [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
+      body: '@reviewer user'
+    });
+  });
+
+  test('issues opened', () => {
+    event.headers['X-GitHub-Event'] = 'issues';
+
+    event.body.action = 'opened';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'Issue Opened [<https://github.com/hoge/fuga/issues/1|test issue title>]',
+      body: 'issue body'
+    });
+  });
+
+  test('issues closed', () => {
+    event.headers['X-GitHub-Event'] = 'issues';
+
+    event.body.action = 'closed';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'Issue Closed [<https://github.com/hoge/fuga/issues/1|test issue title>]',
+      body: ''
+    });
+  });
+
+  test('issue_comment created', () => {
+    event.headers['X-GitHub-Event'] = 'issue_comment';
+
+    event.body.action = 'created';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'Comment on [<https://github.com/hoge/fuga/issues/1#issuecomment-12345|test issue title>]',
+      body: 'issue comment body'
+    });
+  });
+
+  test('pull_request_review approval', () => {
+    event.headers['X-GitHub-Event'] = 'pull_request_review';
+
+    event.body.action = 'submitted';
+    event.body.review.state = 'approved';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'Pullrequest approval [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
+      body: ''
+    });
+  });
+
+  test('pull_request_review change_request', () => {
+    event.headers['X-GitHub-Event'] = 'pull_request_review';
+
+    event.body.action = 'submitted';
+    event.body.review.state = 'changes_requested';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'Pullrequest change request [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
+      body: ''
+    });
+  });
+
+  test('pull_request_review comment', () => {
+    event.headers['X-GitHub-Event'] = 'pull_request_review_comment';
+
+    event.body.action = 'created';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'Review on [<https://github.com/hoge/fuga/issues/1#issuecomment-12345|test pull_request title>]',
+      body: 'issue comment body'
+    });
+  });
+
+  test('convert mention', () => {
+    event.headers['X-GitHub-Event'] = 'pull_request';
+
+    event.body.action = 'opened';
+    event.body.pull_request.body = '@GITHUB_USER_ID_1 abc';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        '<@SLACK_USER_ID_1> Pullrequest Opened [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
+      body: '@GITHUB_USER_ID_1 abc'
+    });
+  });
+
+  test('other event', () => {
+    event.headers['X-GitHub-Event'] = 'hoge';
+
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title: null,
+      body: null
     });
   });
 });
