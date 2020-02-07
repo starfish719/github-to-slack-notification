@@ -102,7 +102,7 @@ function getMessageObject(event) {
     const pullRequestLink = `[<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
     if (gitHubBody.review.state === 'approved') {
       msgObj.title = `Pullrequest approval ${pullRequestLink}`;
-      msgObj.body = '';
+      msgObj.body = `@${gitHubBody.pull_request.user.login}`;
     } else if (gitHubBody.review.state === 'changes_requested') {
       msgObj.title = `Pullrequest change request ${pullRequestLink}`;
       msgObj.body = '';
