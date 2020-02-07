@@ -9,6 +9,9 @@ Convert github mentions to slack mentions
 - `npm ci`
 - `npm run test`
 
+## Commit
+- `npm run commit`
+
 ## Setting
 ### Create slack app
 - Aaccess to https://api.slack.com
