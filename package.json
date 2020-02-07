@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint --ext .js .",
-    "lint:fix": "eslint --fix --ext .js ."
+    "lint:fix": "eslint --fix --ext .js .",
+    "commit": "git-cz"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-prettier": "^3.1.2",
+    "git-cz": "^4.3.1",
     "husky": "^4.2.1",
     "jest": "^25.1.0",
     "lint-staged": "^10.0.2",
