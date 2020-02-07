@@ -72,7 +72,10 @@ describe('getMessageObject', () => {
         pull_request: {
           title: 'test pull_request title',
           html_url: 'https://github.com/hoge/fuga/pull/1',
-          body: 'pull_request body'
+          body: 'pull_request body',
+          user: {
+            login: 'author'
+          }
         },
         requested_reviewer: { login: 'reviewer user' },
         review: { state: '' },
@@ -170,7 +173,7 @@ describe('getMessageObject', () => {
     expect(getMessageObject(event)).toStrictEqual({
       title:
         'Pullrequest approval [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
-      body: ''
+      body: '@author'
     });
   });
 
