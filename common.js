@@ -73,8 +73,9 @@ function getMessageObject(event) {
 
   if (eventName === 'pull_request') {
     const pullRequestLink = `[<${gitHubBody.pull_request.html_url}|${gitHubBody.pull_request.title}>]`;
+    const pullRequestUser = gitHubBody.pull_request.user.login;
     if (gitHubBody.action === 'opened') {
-      msgObj.title = `Pullrequest Opened ${pullRequestLink}`;
+      msgObj.title = `${pullRequestUser} Pullrequest Opened ${pullRequestLink}`;
       msgObj.body = gitHubBody.pull_request.body;
     } else if (gitHubBody.action === 'closed') {
       msgObj.title = `Pullrequest Closed ${pullRequestLink}`;
@@ -93,7 +94,7 @@ function getMessageObject(event) {
       msgObj.body = '';
     }
   } else if (eventName === 'issue_comment' && gitHubBody.action === 'created') {
-    msgObj.title = `Comment on [<${gitHubBody.comment.html_url}|${gitHubBody.issue.title}>]`;
+    msgObj.title = `${gitHubBody.comment.user.login} Comment on [<${gitHubBody.comment.html_url}|${gitHubBody.issue.title}>]`;
     msgObj.body = gitHubBody.comment.body;
   } else if (
     eventName === 'pull_request_review' &&
@@ -111,7 +112,7 @@ function getMessageObject(event) {
     eventName === 'pull_request_review_comment' &&
     gitHubBody.action === 'created'
   ) {
-    msgObj.title = `Review on [<${gitHubBody.comment.html_url}|${gitHubBody.pull_request.title}>]`;
+    msgObj.title = `${gitHubBody.comment.user.login} Review on [<${gitHubBody.comment.html_url}|${gitHubBody.pull_request.title}>]`;
     msgObj.body = gitHubBody.comment.body;
   } else {
     return msgObj;
