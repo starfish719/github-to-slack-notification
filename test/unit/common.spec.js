@@ -78,7 +78,12 @@ describe('getMessageObject', () => {
           }
         },
         requested_reviewer: { login: 'reviewer user' },
-        review: { state: '' },
+        review: {
+          state: '',
+          user: {
+            login: 'reviewer'
+          }
+        },
         issue: {
           title: 'test issue title',
           html_url: 'https://github.com/hoge/fuga/issues/1',
@@ -175,7 +180,7 @@ describe('getMessageObject', () => {
     event.body = JSON.stringify(event.body);
     expect(getMessageObject(event)).toStrictEqual({
       title:
-        'Pullrequest approval [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
+        'reviewer Pullrequest approval [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
       body: '@author'
     });
   });
@@ -188,7 +193,7 @@ describe('getMessageObject', () => {
     event.body = JSON.stringify(event.body);
     expect(getMessageObject(event)).toStrictEqual({
       title:
-        'Pullrequest change request [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
+        'reviewer Pullrequest change request [<https://github.com/hoge/fuga/pull/1|test pull_request title>]',
       body: ''
     });
   });
