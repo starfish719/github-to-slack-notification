@@ -28,7 +28,7 @@
     "git-cz": "^4.3.1",
     "husky": "^4.2.1",
     "jest": "^25.1.0",
-    "lint-staged": "^10.0.2",
+    "lint-staged": "^10.0.8",
     "prettier": "^1.19.1"
   },
   "husky": {
