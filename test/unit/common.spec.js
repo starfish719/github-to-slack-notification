@@ -95,6 +95,14 @@ describe('getMessageObject', () => {
           user: {
             login: 'author'
           }
+        },
+        discussion: {
+          html_url: 'https://github.com/hoge/fuga/discussions/1',
+          title: 'discussion title',
+          body: 'discussion body',
+          user: {
+            login: 'author'
+          }
         }
       }
     };
@@ -207,6 +215,18 @@ describe('getMessageObject', () => {
       title:
         'author Review on [<https://github.com/hoge/fuga/issues/1#issuecomment-12345|test pull_request title>]',
       body: 'issue comment body'
+    });
+  });
+
+  test('discussion', () => {
+    event.headers['X-GitHub-Event'] = 'discussion';
+
+    event.body.action = 'created';
+    event.body = JSON.stringify(event.body);
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'Discussion Created [<https://github.com/hoge/fuga/discussions/1|discussion title>]',
+      body: 'discussion body'
     });
   });
 
