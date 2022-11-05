@@ -230,6 +230,20 @@ describe('getMessageObject', () => {
     });
   });
 
+  test('discussion_comment created', () => {
+    event.headers['X-GitHub-Event'] = 'discussion_comment';
+
+    event.body.action = 'created';
+    event.body = JSON.stringify(event.body);
+
+    //TODO: mockデータがissue_commentと同じものになっているので要変更
+    expect(getMessageObject(event)).toStrictEqual({
+      title:
+        'author Comment on [<https://github.com/hoge/fuga/issues/1#issuecomment-12345|discussion title>]',
+      body: 'issue comment body'
+    });
+  });
+
   test('convert mention', () => {
     event.headers['X-GitHub-Event'] = 'pull_request';
 
