@@ -114,6 +114,16 @@ function getMessageObject(event) {
   ) {
     msgObj.title = `${gitHubBody.comment.user.login} Review on [<${gitHubBody.comment.html_url}|${gitHubBody.pull_request.title}>]`;
     msgObj.body = gitHubBody.comment.body;
+  } else if (
+    eventName === 'discussion' &&
+    gitHubBody.action === 'created'
+  ) {
+    const discussionLink = `[<${gitHubBody.discussion.html_url}|${gitHubBody.discussion.title}>]`;
+    msgObj.title = `Discussion Created ${discussionLink}`;
+    msgObj.body = gitHubBody.discussion.body;
+  } else if (eventName === 'discussion_comment' && gitHubBody.action === 'created') {
+    msgObj.title = `${gitHubBody.comment.user.login} Comment on [<${gitHubBody.comment.html_url}|${gitHubBody.discussion.title}>]`;
+    msgObj.body = gitHubBody.comment.body;
   } else {
     return msgObj;
   }
