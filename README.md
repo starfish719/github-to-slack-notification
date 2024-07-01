@@ -14,7 +14,7 @@ Convert github mentions to slack mentions
 
 ## Setting
 ### Create slack app
-- Aaccess to https://api.slack.com
+- Access to https://api.slack.com
 - Create new app
 - Set permission `chat:write:bot`
 - Remember the OAuth Access Token
